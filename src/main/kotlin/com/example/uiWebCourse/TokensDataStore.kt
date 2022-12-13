@@ -39,4 +39,8 @@ class TokensDataStore {
         )
     }
     fun getAccessToken(): StateFlow<String?> = accessToken
+
+    fun clearTokens(){
+        localStorage.clear()
+    }
 }

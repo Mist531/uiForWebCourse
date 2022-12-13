@@ -37,7 +37,6 @@ class UserRepositoriesImpl : UserRepositories, KoinComponent {
             setBody(logModel)
         }.let {
             return if (it.status.isSuccess()){
-                //console.log("TOKENS: " + it.body<TokensModel>().toString())
                 Pair(it.body<TokensModel>(), null)
             } else {
                 Pair(null, it.body<String>())
@@ -48,7 +47,6 @@ class UserRepositoriesImpl : UserRepositories, KoinComponent {
     override suspend fun getUserInfo(): Pair<GetUserModel?, String?> {
         client.get(API.GET_USER_INFO.url).let {
             return if (it.status.isSuccess()){
-               // console.log("USER: " + it.body<GetUserModel?>().toString())
                 Pair(it.body<GetUserModel>(), null)
             } else {
                 Pair(null, it.body<String>())
