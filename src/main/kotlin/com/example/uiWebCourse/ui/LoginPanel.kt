@@ -1,10 +1,12 @@
 package com.example.uiWebCourse.ui
 
 import com.example.uiWebCourse.RootUi
-import com.example.uiWebCourse.actions.UserActionModel
 import com.example.uiWebCourse.isEmailValid
 import com.example.uiWebCourse.models.LoginModel
-import io.kvision.core.*
+import io.kvision.core.AlignItems
+import io.kvision.core.Display
+import io.kvision.core.JustifyContent
+import io.kvision.core.Style
 import io.kvision.form.formPanel
 import io.kvision.form.text.Text
 import io.kvision.html.button
@@ -23,8 +25,7 @@ val signInUpPanelStyle = Style {
 }
 
 class LoginPanel(
-    val store: UserActionModel,
-    login: (LoginModel) -> Unit
+    loginClick: (LoginModel) -> Unit
 ) : VPanel() {
     init {
         addCssStyle(signInUpPanelStyle)
@@ -57,7 +58,7 @@ class LoginPanel(
                         console.log(loginModel.toString())
                         console.log(validation.toString())
                         if (validation) {
-                            login(loginModel)
+                            loginClick(loginModel)
                         }
                     }
                 }

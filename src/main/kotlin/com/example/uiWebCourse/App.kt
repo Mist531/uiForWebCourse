@@ -1,12 +1,14 @@
 package com.example.uiWebCourse
 
-import com.example.uiWebCourse.actions.UserAction
-import com.example.uiWebCourse.actions.UserActionModel
-import com.example.uiWebCourse.actions.userReducer
+import com.example.uiWebCourse.actions.StoreAction
+import com.example.uiWebCourse.actions.StoreState
+import com.example.uiWebCourse.actions.storeReducer
 import com.example.uiWebCourse.models.LoginModel
 import com.example.uiWebCourse.models.RegisterUserModel
 import com.example.uiWebCourse.modules.clientModule
+import com.example.uiWebCourse.modules.commonModule
 import com.example.uiWebCourse.modules.repositoriesModule
+import com.example.uiWebCourse.repositories.CourseRepositories
 import com.example.uiWebCourse.repositories.UserRepositories
 import com.example.uiWebCourse.ui.LoginPanel
 import com.example.uiWebCourse.ui.RegistrationPanel
@@ -20,6 +22,7 @@ import io.kvision.redux.createReduxStore
 import io.kvision.routing.Routing
 import io.kvision.routing.routing
 import io.kvision.state.bind
+import io.kvision.utils.px
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -33,58 +36,72 @@ val AppScope = CoroutineScope(window.asCoroutineDispatcher())
 class App : Application(), KoinComponent {
 
     init {
-        Routing.init()
+        Routing.init(null, true)
     }
 
-    private val userStore = createReduxStore(
-        ::userReducer,
-        UserActionModel()
+    private val store = createReduxStore(
+        ::storeReducer,
+        StoreState()
     )
 
     override fun start() {
-
         startKoin {
             modules(
-                clientModule, repositoriesModule
+                clientModule, repositoriesModule, commonModule
             )
         }
 
-        /*val testModel = RegisterUserModel(
-            login = "test",
-            password = "test",
-            firstName = "test",
-            lastName = "test",
-            patronymic = "test",
-        )*/
+        val tokensDataStore: TokensDataStore by inject()
 
-        root("kvapp").bind(userStore) { store ->
+        if(tokensDataStore.getJwtTokens() == null){
+            routing.navigate(RootUi.LOGIN.url)
+        }else{
+            AppScope.launch {
+                launch {
+                    store.dispatch(getUserInfo())
+                }
+                launch {
+                    store.dispatch(getCourseInfo())
+                }
+            }
+            routing.navigate(RootUi.HOME.url)
+        }
+
+        root("kvapp").bind(store) { store ->
             stackPanel {
                 add(
                     panel = RegistrationPanel(
-                        registration = { regModel ->
-                            userStore.dispatch(
+                        registrationClick = { regModel ->
+                            this@App.store.dispatch(
                                 registration(regModel)
                             )
-                        },
-                        store = store
+                        }
                     ),
                     route = RootUi.REGISTER.url
                 )
                 add(
                     panel = LoginPanel(
-                        login = { loginModel ->
-                            userStore.dispatch(
+                        loginClick = { loginModel ->
+                            this@App.store.dispatch(
                                 login(loginModel)
                             )
-                        },
-                        store = store
+                        }
                     ),
                     route = RootUi.LOGIN.url
                 )
                 add(
-                    panel = VPanel() {
+                    panel = VPanel {
                         div {
-                            +"Hello, ${store.user?.firstName} ${store.user?.lastName} ${store.user?.patronymic}"
+                            this.marginBottom = 50.px
+                            +"Hello, ${store.userInfo?.firstName} ${store.userInfo?.lastName} ${store.userInfo?.patronymic}"
+                        }
+                        store.listCourse?.forEach {
+                            div {
+                                +it.name
+                            }
+                            div {
+                                +"${it.description}"
+                            }
                         }
                     },
                     route = RootUi.HOME.url
@@ -95,18 +112,15 @@ class App : Application(), KoinComponent {
 
     private fun registration(
         regModel: RegisterUserModel
-    ): ActionCreator<dynamic, UserActionModel> {
+    ): ActionCreator<dynamic, StoreState> {
         return { dispatch, _ ->
             val userRep: UserRepositories by inject()
             AppScope.launch {
                 userRep.registerUser(regModel).let { (isSuccess, errorMessage) ->
                     if (isSuccess) {
-                        dispatch(UserAction.SetRegistration(isSuccess)).let {
-                            routing.kvNavigate(RootUi.LOGIN.url)
-                        }
+                        routing.navigate(RootUi.LOGIN.url)
                     } else {
-                        dispatch(UserAction.SetRegistration(isSuccess))
-                        dispatch(UserAction.Error(errorMessage = errorMessage ?: "Unknown error"))
+                        dispatch(StoreAction.Error(errorMessage = errorMessage ?: "Unknown error"))
                     }
                 }
             }
@@ -115,28 +129,59 @@ class App : Application(), KoinComponent {
 
     private fun login(
         logModel: LoginModel
-    ): ActionCreator<dynamic, UserActionModel> {
+    ): ActionCreator<dynamic, StoreState> {
         return { dispatch, _ ->
             val userRep: UserRepositories by inject()
+            val tokensDataStore: TokensDataStore by inject()
             AppScope.launch {
                 userRep.loginUser(logModel).let { (tokens, errorMessage) ->
                     if (tokens != null) {
-                        dispatch(UserAction.SetTokens(tokens)).let {
-                            userRep.getUserInfo(tokens).let { (user, errorMessage) ->
-                                console.log("USER: " + user.toString())
-                                if (user != null) {
-                                    dispatch(UserAction.SetUser(user)).let {
-                                        routing.kvNavigate(RootUi.HOME.url)
-                                    }
-                                } else {
-                                    dispatch(UserAction.Error(errorMessage = errorMessage ?: "Unknown error")).let {
-                                        routing.kvNavigate(RootUi.LOGIN.url)
-                                    }
-                                }
+                        tokensDataStore.setTokens(tokens).let {
+                            launch {
+                                store.dispatch(getCourseInfo())
+                            }
+                            launch {
+                                store.dispatch(getUserInfo())
                             }
                         }
                     } else {
-                        dispatch(UserAction.Error(errorMessage = errorMessage ?: "Unknown error"))
+                        dispatch(StoreAction.Error(errorMessage = errorMessage ?: "Unknown error"))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getCourseInfo(): ActionCreator<dynamic, StoreState> {
+        return { dispatch, _ ->
+            val courseRep: CourseRepositories by inject()
+            AppScope.launch {
+                courseRep.getCoursesInfo().let { courses ->
+                    dispatch(StoreAction.SetListCourse(courses)).let {
+                        routing.navigate(RootUi.HOME.url)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getUserInfo(): ActionCreator<dynamic, StoreState> {
+        return { dispatch, _ ->
+            val userRep: UserRepositories by inject()
+            AppScope.launch {
+                userRep.getUserInfo().let{(user, errorMessage) ->
+                    if (user != null) {
+                        dispatch(StoreAction.SetUserInfo(user)).let {
+                            routing.navigate(RootUi.HOME.url)
+                        }
+                    } else {
+                        dispatch(
+                            StoreAction.Error(
+                                errorMessage = errorMessage ?: "Unknown error"
+                            )
+                        ).let {
+                            routing.navigate(RootUi.LOGIN.url)
+                        }
                     }
                 }
             }
