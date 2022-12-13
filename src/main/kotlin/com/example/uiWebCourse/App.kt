@@ -1,5 +1,6 @@
 package com.example.uiWebCourse
 
+import com.example.uiWebCourse.actions.StoreAction
 import com.example.uiWebCourse.actions.StoreState
 import com.example.uiWebCourse.actions.storeReducer
 import com.example.uiWebCourse.manaders.CourseManager
@@ -8,12 +9,15 @@ import com.example.uiWebCourse.modules.clientModule
 import com.example.uiWebCourse.modules.commonModule
 import com.example.uiWebCourse.modules.managersModule
 import com.example.uiWebCourse.modules.repositoriesModule
+import com.example.uiWebCourse.ui.CoursesPanel
 import com.example.uiWebCourse.ui.LoginPanel
 import com.example.uiWebCourse.ui.RegistrationPanel
 import io.kvision.*
 import io.kvision.core.AlignItems
 import io.kvision.html.button
 import io.kvision.html.div
+import io.kvision.i18n.I18n.tr
+import io.kvision.modal.Alert
 import io.kvision.panel.VPanel
 import io.kvision.panel.root
 import io.kvision.panel.stackPanel
@@ -55,9 +59,20 @@ class App : Application(), KoinComponent {
         StoreState()
     )
 
+
     override fun start() {
         root("kvapp").bind(store) { storeState ->
             stackPanel {
+                if (store.getState().errorMessage != null) {
+                    Alert.show(
+                        caption = tr("Error"),
+                        text = store.getState().errorMessage.toString(),
+                        animation = true,
+                        centered = true
+                    ) {
+                        store.dispatch(StoreAction.Error(errorMessage = null))
+                    }
+                }
                 add(
                     panel = RegistrationPanel(
                         registrationClick = { regModel ->
@@ -86,32 +101,16 @@ class App : Application(), KoinComponent {
                     route = RootUi.LOGIN.url
                 )
                 add(
-                    panel = VPanel {
-                        button("Logout") {
-                            width = 200.px
-                            alignItems = AlignItems.CENTER
-                            onClick {
-                                AppScope.launch {
-                                    tokensDataStore.clearTokens().let {
-                                        routing.navigate(RootUi.LOGIN.url)
-                                    }
-                                }
+                    panel = CoursesPanel(
+                        goCourseClick = {coursesUUID->
+                            AppScope.launch {
+
                             }
-                        }
-                        div {
-                            this.marginBottom = 50.px
-                            +"Hello, ${storeState.userInfo?.firstName} ${storeState.userInfo?.lastName} ${storeState.userInfo?.patronymic}"
-                        }
-                        storeState.listCourse?.forEach {
-                            div {
-                                +it.name
-                            }
-                            div {
-                                +"${it.description}"
-                            }
-                        }
-                    },
-                    route = RootUi.HOME.url
+                        },
+                        storeState = store.getState(),
+                        tokensDataStore = tokensDataStore,
+                    ),
+                    route = RootUi.COURSES.url
                 )
             }
         }
@@ -131,7 +130,7 @@ class App : Application(), KoinComponent {
                     store.dispatch(courseManager.getCourseInfo())
                 }
             }
-            routing.navigate(RootUi.HOME.url)
+            routing.navigate(RootUi.COURSES.url)
         }
     }
 }

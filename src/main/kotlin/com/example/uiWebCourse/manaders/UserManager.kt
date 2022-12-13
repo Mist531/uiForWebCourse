@@ -79,7 +79,7 @@ class UserManagerImpl : UserManager, KoinComponent {
                 userRep.getUserInfo().let{(user, errorMessage) ->
                     if (user != null) {
                         dispatch(StoreAction.SetUserInfo(user)).let {
-                            routing.navigate(RootUi.HOME.url)
+                            routing.navigate(RootUi.COURSES.url)
                         }
                     } else {
                         dispatch(

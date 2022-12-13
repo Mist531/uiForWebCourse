@@ -4,6 +4,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.uuid.UUID
 
 @Serializable
+data class UUIDCourse(
+    val courseInfoId: UUID
+)
+
+@Serializable
 data class CourseModel(
     val courseInfoId: UUID,
     val name:String,

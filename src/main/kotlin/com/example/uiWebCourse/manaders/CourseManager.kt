@@ -22,7 +22,7 @@ class CourseManagerImpl : CourseManager, KoinComponent {
             AppScope.launch {
                 courseRep.getCoursesInfo().let { courses ->
                     dispatch(StoreAction.SetListCourse(courses)).let {
-                        routing.navigate(RootUi.HOME.url)
+                        routing.navigate(RootUi.COURSES.url)
                     }
                 }
             }

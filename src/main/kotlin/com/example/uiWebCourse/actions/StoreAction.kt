@@ -15,7 +15,7 @@ data class StoreState(
 )
 
 sealed class StoreAction : RAction {
-    data class Error(val errorMessage: String) : StoreAction()
+    data class Error(val errorMessage: String?) : StoreAction()
     data class SetUserInfo(val userInfo: GetUserModel) : StoreAction()
     data class SetTokens(val tokens: TokensModel) : StoreAction()
     data class SetListCourse(val listCourse: List<CourseModel>) : StoreAction()
