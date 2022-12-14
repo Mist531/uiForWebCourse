@@ -23,10 +23,24 @@ class CoursesPanel(
     spacing = 10,
     justify = JustifyContent.CENTER
 ) {
+    private fun getUserInfo(storeState: StoreState): String {
+        var user = ""
+        if (storeState.userInfo != null) {
+            user += "${storeState.userInfo.firstName} ${storeState.userInfo.lastName}"
+            if (storeState.userInfo.patronymic != null) {
+                user += " ${storeState.userInfo.patronymic}"
+            }
+        }
+        return user
+    }
 
     init {
+        div("Добро пожаловать ${getUserInfo(storeState)}!"){
+            this.marginTop = 10.px
+        }
 
-        button("Logout") {
+        button("Выйти из аккаунта") {
+            marginTop = 10.px
             width = 200.px
             alignItems = AlignItems.CENTER
             onClick {

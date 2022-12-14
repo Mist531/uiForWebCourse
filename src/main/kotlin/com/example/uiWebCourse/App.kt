@@ -1,5 +1,6 @@
 package com.example.uiWebCourse
 
+import com.example.uiWebCourse.actions.SelectCourse
 import com.example.uiWebCourse.actions.StoreAction
 import com.example.uiWebCourse.actions.StoreState
 import com.example.uiWebCourse.actions.storeReducer
@@ -116,9 +117,12 @@ class App : Application(), KoinComponent {
                                 launch {
                                     this@App.store.dispatch(
                                         StoreAction.SetNameSelectCourse(
-                                            store.getState().listCourse?.find {
-                                                it.courseInfoId == coursesUUID
-                                            }?.name ?: "ID Курса: $coursesUUID"
+                                            SelectCourse(
+                                                courseInfoId = coursesUUID,
+                                                courseName = store.getState().listCourse?.find {
+                                                    it.courseInfoId == coursesUUID
+                                                }?.name ?: "ID Курса: $coursesUUID"
+                                            )
                                         )
                                     )
                                 }
@@ -165,13 +169,11 @@ class App : Application(), KoinComponent {
             routing.navigate(RootUi.LOGIN.url)
         } else {
             AppScope.launch {
-                store.dispatch(
-                    StoreAction.SetLoading(
-                        loading = true
-                    )
-                )
                 launch {
                     store.dispatch(userManager.getUserInfo())
+                }
+                launch {
+                    store.dispatch(courseManager.getCourseInfo())
                 }
             }
             routing.navigate(RootUi.COURSES.url)
@@ -185,7 +187,7 @@ class App : Application(), KoinComponent {
             "Поздравляем! Вы прошли курс!"
         } else {
             val listWrongQuestion = resultCourseModel.listWrongQuestion
-            "Вы ответили неправильно на ${resultCourseModel.wrongAnswer} вопросов.\n" +
+            "Вы ответили неправильно на ${resultCourseModel.wrongAnswer} вопросов.\n\n" +
                     "Список неправильных ответов: ${
                         resultCourseModel.listWrongQuestion.mapIndexed { index, wrongQuestion ->
                             if (index != listWrongQuestion.size - 1) {
@@ -193,7 +195,7 @@ class App : Application(), KoinComponent {
                             } else {
                                 "${getNameQuestion(wrongQuestion = wrongQuestion)}."
                             }
-                        }
+                        }.joinToString(separator = "")
                     }"
         }
     }

@@ -26,6 +26,7 @@ class CourseRepositoriesImpl : CourseRepositories, KoinComponent {
     }
 
     override suspend fun checkCourse(checkCourseModel: CheckCourseModel): Pair<ResultCourseModel?, String?> {
+        console.log(checkCourseModel.toString())
         return client.post(API.POST_CHECK_COURSE.url) {
             setBody(checkCourseModel)
         }.let {

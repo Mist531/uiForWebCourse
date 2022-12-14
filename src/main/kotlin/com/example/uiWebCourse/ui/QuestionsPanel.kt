@@ -27,8 +27,6 @@ class QuestionsPanel(
     justify = JustifyContent.CENTER
 ) {
 
-    private val courseInfoId = storeState.listQuestions?.firstOrNull()?.courseInfoId
-
     private val listForm = storeState.listQuestions?.map { course ->
         formPanel<CheckQuestionModelString> {
             add(
@@ -50,17 +48,18 @@ class QuestionsPanel(
     init {
 
         button(text = "Вернуться к списку курсов") {
+            this.marginTop = 10.px
             onClick {
                 backClick()
             }
         }
 
         div {
-            h4("Вопросы курса: ${storeState.nameSelectCourse}")
+            h4("Вопросы курса: ${storeState.selectCourse?.courseName}")
             storeState.listQuestions?.forEachIndexed { index, course ->
                 listForm?.get(index)?.let { form ->
-                    paddingTop = 20.px
                     fieldsetPanel(course.question) {
+                        this.marginTop = 10.px
                         add(form)
                     }
                 }
@@ -80,25 +79,22 @@ class QuestionsPanel(
                 }.let { list ->
                     if (list?.all { it } == true) {
 
-                        var listCheckQuestion: List<CheckQuestionModel> = listOf()
+                        val listCheckQuestion: List<CheckQuestionModel> = listForm?.map { form ->
+                            CheckQuestionModel(
+                                questionsInfoId = storeState.listQuestions?.get(listForm.indexOf(form))?.questionInfoId
+                                    ?: UUID.generateUUID(),
+                                selectAnswerId = UUID(form.getData().selectAnswerId)
+                            )
+                        } ?: listOf()
 
-                        if (courseInfoId != null) {
-                            listCheckQuestion = listForm?.map { form ->
-                                CheckQuestionModel(
-                                    questionsInfoId = storeState.listQuestions?.get(listForm.indexOf(form))?.questionInfoId
-                                        ?: UUID.generateUUID(),
-                                    selectAnswerId = UUID(form.getData().selectAnswerId)
-                                )
-                            } ?: listOf()
-                        }
-
-                        storeState.listCourse?.firstOrNull()?.courseInfoId.let { id ->
+                        storeState.selectCourse?.courseInfoId.let { id ->
                             if (id is UUID) {
                                 checkCourse(CheckCourseModel(id, listCheckQuestion))
                             }
                         }
                     }
                 }
+
             }
         }
     }
