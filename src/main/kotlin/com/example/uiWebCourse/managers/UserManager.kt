@@ -1,4 +1,4 @@
-package com.example.uiWebCourse.manaders
+package com.example.uiWebCourse.managers
 
 import com.example.uiWebCourse.AppScope
 import com.example.uiWebCourse.RootUi
@@ -76,7 +76,7 @@ class UserManagerImpl : UserManager, KoinComponent {
         return { dispatch, _ ->
             val userRep: UserRepositories by inject()
             AppScope.launch {
-                userRep.getUserInfo().let{(user, errorMessage) ->
+                userRep.getUserInfo().let { (user, errorMessage) ->
                     if (user != null) {
                         dispatch(StoreAction.SetUserInfo(user)).let {
                             routing.navigate(RootUi.COURSES.url)
@@ -94,5 +94,4 @@ class UserManagerImpl : UserManager, KoinComponent {
             }
         }
     }
-
 }

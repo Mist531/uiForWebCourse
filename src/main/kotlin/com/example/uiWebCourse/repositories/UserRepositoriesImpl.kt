@@ -22,7 +22,6 @@ interface UserRepositories {
 }
 
 class UserRepositoriesImpl : UserRepositories, KoinComponent {
-
     private val client: HttpClient by inject()
 
     override suspend fun registerUser(regModel: RegisterUserModel): Pair<Boolean, String?> {
@@ -36,7 +35,7 @@ class UserRepositoriesImpl : UserRepositories, KoinComponent {
         client.post(API.POST_LOGIN.url) {
             setBody(logModel)
         }.let {
-            return if (it.status.isSuccess()){
+            return if (it.status.isSuccess()) {
                 Pair(it.body<TokensModel>(), null)
             } else {
                 Pair(null, it.body<String>())
@@ -46,12 +45,11 @@ class UserRepositoriesImpl : UserRepositories, KoinComponent {
 
     override suspend fun getUserInfo(): Pair<GetUserModel?, String?> {
         client.get(API.GET_USER_INFO.url).let {
-            return if (it.status.isSuccess()){
+            return if (it.status.isSuccess()) {
                 Pair(it.body<GetUserModel>(), null)
             } else {
                 Pair(null, it.body<String>())
             }
         }
     }
-
 }

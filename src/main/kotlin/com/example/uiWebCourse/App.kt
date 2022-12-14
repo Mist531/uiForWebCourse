@@ -3,33 +3,33 @@ package com.example.uiWebCourse
 import com.example.uiWebCourse.actions.StoreAction
 import com.example.uiWebCourse.actions.StoreState
 import com.example.uiWebCourse.actions.storeReducer
-import com.example.uiWebCourse.manaders.CourseManager
-import com.example.uiWebCourse.manaders.UserManager
+import com.example.uiWebCourse.managers.CourseManager
+import com.example.uiWebCourse.managers.QuestionManager
+import com.example.uiWebCourse.managers.UserManager
+import com.example.uiWebCourse.models.ResultCourseModel
 import com.example.uiWebCourse.modules.clientModule
 import com.example.uiWebCourse.modules.commonModule
 import com.example.uiWebCourse.modules.managersModule
 import com.example.uiWebCourse.modules.repositoriesModule
 import com.example.uiWebCourse.ui.CoursesPanel
 import com.example.uiWebCourse.ui.LoginPanel
+import com.example.uiWebCourse.ui.QuestionsPanel
 import com.example.uiWebCourse.ui.RegistrationPanel
 import io.kvision.*
-import io.kvision.core.AlignItems
-import io.kvision.html.button
-import io.kvision.html.div
 import io.kvision.i18n.I18n.tr
 import io.kvision.modal.Alert
-import io.kvision.panel.VPanel
 import io.kvision.panel.root
 import io.kvision.panel.stackPanel
 import io.kvision.redux.createReduxStore
 import io.kvision.routing.Routing
+import io.kvision.routing.Strategy
 import io.kvision.routing.routing
 import io.kvision.state.bind
-import io.kvision.utils.px
 import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import kotlinx.uuid.UUID
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
@@ -41,9 +41,10 @@ class App : Application(), KoinComponent {
     private val tokensDataStore: TokensDataStore by inject()
     private val courseManager: CourseManager by inject()
     private val userManager: UserManager by inject()
+    private val questionManager: QuestionManager by inject()
 
     init {
-        Routing.init(null, true)
+        Routing.init(null, true, Strategy.ALL)
 
         startKoin {
             modules(
@@ -63,14 +64,22 @@ class App : Application(), KoinComponent {
     override fun start() {
         root("kvapp").bind(store) { storeState ->
             stackPanel {
-                if (store.getState().errorMessage != null) {
+                if (storeState.errorMessage != null) {
                     Alert.show(
                         caption = tr("Error"),
-                        text = store.getState().errorMessage.toString(),
-                        animation = true,
+                        text = storeState.errorMessage.toString(),
                         centered = true
                     ) {
                         store.dispatch(StoreAction.Error(errorMessage = null))
+                    }
+                }
+                if (storeState.resultCourse != null) {
+                    Alert.show(
+                        caption = tr("Результат"),
+                        text = textResultCheckCourse(storeState.resultCourse),
+                        centered = true
+                    ) {
+                        store.dispatch(StoreAction.SetResultCourse(resultCourse = null))
                     }
                 }
                 add(
@@ -102,15 +111,48 @@ class App : Application(), KoinComponent {
                 )
                 add(
                     panel = CoursesPanel(
-                        goCourseClick = {coursesUUID->
+                        goCourseClick = { coursesUUID ->
                             AppScope.launch {
-
+                                launch {
+                                    this@App.store.dispatch(
+                                        StoreAction.SetNameSelectCourse(
+                                            store.getState().listCourse?.find {
+                                                it.courseInfoId == coursesUUID
+                                            }?.name ?: "ID Курса: $coursesUUID"
+                                        )
+                                    )
+                                }
+                                launch {
+                                    this@App.store.dispatch(
+                                        questionManager.getQuestions(
+                                            coursesUUID
+                                        )
+                                    )
+                                }
                             }
                         },
                         storeState = store.getState(),
                         tokensDataStore = tokensDataStore,
                     ),
                     route = RootUi.COURSES.url
+                )
+                add(
+                    panel = QuestionsPanel(
+                        backClick = {
+                            routing.navigate(RootUi.COURSES.url)
+                        },
+                        checkCourse = { checkCourseModel ->
+                            AppScope.launch {
+                                this@App.store.dispatch(
+                                    courseManager.checkCourseAnswer(
+                                        checkCourseModel
+                                    )
+                                )
+                            }
+                        },
+                        storeState = store.getState(),
+                    ),
+                    route = RootUi.QUESTIONS.url
                 )
             }
         }
@@ -123,15 +165,48 @@ class App : Application(), KoinComponent {
             routing.navigate(RootUi.LOGIN.url)
         } else {
             AppScope.launch {
+                store.dispatch(
+                    StoreAction.SetLoading(
+                        loading = true
+                    )
+                )
                 launch {
                     store.dispatch(userManager.getUserInfo())
-                }
-                launch {
-                    store.dispatch(courseManager.getCourseInfo())
                 }
             }
             routing.navigate(RootUi.COURSES.url)
         }
+    }
+
+    private fun textResultCheckCourse(
+        resultCourseModel: ResultCourseModel
+    ): String {
+        return if (resultCourseModel.wrongAnswer <= 0) {
+            "Поздравляем! Вы прошли курс!"
+        } else {
+            val listWrongQuestion = resultCourseModel.listWrongQuestion
+            "Вы ответили неправильно на ${resultCourseModel.wrongAnswer} вопросов.\n" +
+                    "Список неправильных ответов: ${
+                        resultCourseModel.listWrongQuestion.mapIndexed { index, wrongQuestion ->
+                            if (index != listWrongQuestion.size - 1) {
+                                "${getNameQuestion(wrongQuestion = wrongQuestion)}, "
+                            } else {
+                                "${getNameQuestion(wrongQuestion = wrongQuestion)}."
+                            }
+                        }
+                    }"
+        }
+    }
+
+    private fun getNameQuestion(
+        wrongQuestion: String,
+        storeState: StoreState = store.getState(),
+    ): String {
+        return storeState.listQuestions?.let {
+            it.find {
+                it.questionInfoId == UUID(wrongQuestion)
+            }
+        }?.question ?: "ID Вопроса: $wrongQuestion"
     }
 }
 

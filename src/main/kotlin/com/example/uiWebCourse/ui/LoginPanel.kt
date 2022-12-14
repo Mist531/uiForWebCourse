@@ -28,15 +28,17 @@ class LoginPanel(
     loginClick: (LoginModel) -> Unit
 ) : VPanel() {
     init {
+
         addCssStyle(signInUpPanelStyle)
+
         val formPanel = formPanel {
             width = 300.px
             add(
                 key = LoginModel::login,
                 control = Text(label = "Email"),
                 required = true,
-                validatorMessage = { "Введите Email" }
-            ){
+                validatorMessage = { "Введите Email" },
+            ) {
                 it.getValue()?.isEmailValid() == true || it.getValue() == "admin"
             }
             add(
@@ -44,12 +46,14 @@ class LoginPanel(
                 control = Text(label = "Password"),
                 required = true,
                 validatorMessage = { "Введите Password" }
-            ){
+            ) {
                 it.getValue()?.isNotEmpty()
             }
         }
+
         formPanel.add(
             VPanel {
+
                 button(text = "Войти") {
                     width = 300.px
                     onClick {
@@ -62,6 +66,7 @@ class LoginPanel(
                         }
                     }
                 }
+
                 button(text = "Зарегистрироваться") {
                     width = 100.perc
                     marginTop = 10.px

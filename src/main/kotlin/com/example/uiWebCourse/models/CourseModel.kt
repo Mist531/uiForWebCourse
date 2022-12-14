@@ -11,27 +11,19 @@ data class UUIDCourse(
 @Serializable
 data class CourseModel(
     val courseInfoId: UUID,
-    val name:String,
-    val description:String? = null
-)
-
-@Serializable
-data class CreateCourseModel(
-    val name:String,
-    val description:String?
-)
-
-@Serializable
-data class PutCourseModel(
-    val courseInfoId: UUID,
-    val name:String?,
-    val description:String? = null
+    val name: String,
+    val description: String? = null
 )
 
 @Serializable
 data class CheckQuestionModel(
     val questionsInfoId: UUID,
     val selectAnswerId: UUID
+)
+
+@Serializable
+data class CheckQuestionModelString(
+    val selectAnswerId: String
 )
 
 @Serializable

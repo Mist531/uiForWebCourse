@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.w3c.dom.set
 
 class TokensDataStore {
+
     private val JWT_TOKEN_ACCESS = "jwtTokenAccess"
     private val JWT_TOKEN_REFRESH = "jwtTokenRefresh"
 
@@ -23,7 +24,7 @@ class TokensDataStore {
         val refreshToken = localStorage.getItem(JWT_TOKEN_REFRESH)
         return if (accessToken == null || refreshToken == null) {
             null
-        }else{
+        } else {
             TokensModel(accessToken, refreshToken)
         }
     }
@@ -38,9 +39,10 @@ class TokensDataStore {
             localStorage.getItem(JWT_TOKEN_REFRESH)
         )
     }
+
     fun getAccessToken(): StateFlow<String?> = accessToken
 
-    fun clearTokens(){
+    fun clearTokens() {
         localStorage.clear()
     }
 }

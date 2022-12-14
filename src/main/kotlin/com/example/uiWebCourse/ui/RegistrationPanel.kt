@@ -18,6 +18,7 @@ class RegistrationPanel(
         addCssStyle(signInUpPanelStyle)
         val formPanel = formPanel {
             width = 300.px
+
             add(
                 key = RegisterUserModel::login,
                 control = Text(
@@ -28,35 +29,40 @@ class RegistrationPanel(
             ) {
                 it.getValue()?.isEmailValid()
             }
+
             add(
                 key = RegisterUserModel::firstName,
                 control = Text(label = "FirstName"),
                 required = true
-            ){
+            ) {
                 it.getValue()?.isNotEmpty()
             }
+
             add(
                 key = RegisterUserModel::lastName,
                 control = Text(label = "LastName"),
                 required = true
-            ){
+            ) {
                 it.getValue()?.isNotEmpty()
             }
+
             add(
                 key = RegisterUserModel::patronymic,
                 control = Password(label = "Patronymic"),
                 required = false
             )
+
             add(
                 key = RegisterUserModel::password,
                 control = Password(label = "Password"),
                 required = true
-            ){
+            ) {
                 it.getValue()?.isNotEmpty()
             }
         }
         formPanel.add(
             VPanel {
+
                 button(text = "Зарегистрироваться") {
                     width = 300.px
                     marginBottom = 10.px
@@ -70,6 +76,7 @@ class RegistrationPanel(
                         }
                     }
                 }
+
                 button(text = "Войти") {
                     onClick {
                         routing.kvNavigate(RootUi.LOGIN.url)

@@ -16,9 +16,9 @@ import org.koin.dsl.module
 val clientModule = module {
     factory {
         val tokensDataStore: TokensDataStore by inject()
-        HttpClient(Js){
+        HttpClient(Js) {
             install(Logging)
-            install(ContentNegotiation){
+            install(ContentNegotiation) {
                 json(getKoin().get())
             }
             defaultRequest {
