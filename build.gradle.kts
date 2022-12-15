@@ -63,14 +63,16 @@ kotlin {
     sourceSets["main"].dependencies {
         implementation(npm("hammerjs", "2.0.8"))
         implementation("io.kvision:kvision:$kvisionVersion")
+        implementation("io.kvision:kvision-bootstrap-select:$kvisionVersion")
+        implementation("io.kvision:kvision-bootstrap-typeahead:$kvisionVersion")
+        implementation("io.kvision:kvision-bootstrap-datetime:$kvisionVersion")
+        implementation("io.kvision:kvision-bootstrap-select-remote:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap-css:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap-spinner:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap-upload:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap-dialog:$kvisionVersion")
         implementation("io.kvision:kvision-bootstrap-icons:$kvisionVersion")
-        implementation("io.kvision:kvision-bootstrap:$kvisionVersion")
-        implementation("io.kvision:kvision-bootstrap-css:$kvisionVersion")
         implementation("io.kvision:kvision-i18n:$kvisionVersion")
         implementation("io.kvision:kvision-redux:$kvisionVersion")
         implementation("io.kvision:kvision-state:$kvisionVersion")
@@ -88,6 +90,8 @@ kotlin {
         //kotlinx
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
         implementation("app.softwork:kotlinx-uuid-core:0.0.16")
+        //arrow
+        implementation("io.arrow-kt:arrow-fx-coroutines:1.1.2")
     }
     sourceSets["test"].dependencies {
         implementation(kotlin("test-js"))

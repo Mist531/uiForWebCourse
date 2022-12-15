@@ -20,7 +20,7 @@ import kotlinx.uuid.generateUUID
 class QuestionsPanel(
     backClick: () -> Unit,
     checkCourse: (CheckCourseModel) -> Unit,
-    storeState: StoreState
+    storeState: StoreState,
 ) : VPanel(
     alignItems = AlignItems.CENTER,
     spacing = 10,
@@ -42,7 +42,6 @@ class QuestionsPanel(
                 it.getValue()?.isNotEmpty() == true && it.getValue() != null
             }
         }
-
     }
 
     init {
@@ -69,7 +68,6 @@ class QuestionsPanel(
         button(text = "Проверить ответы") {
             width = 300.px
             onClick {
-
                 listForm?.forEach {
                     it.validate()
                 }

@@ -3,6 +3,7 @@ package com.example.uiWebCourse.ui
 import com.example.uiWebCourse.AppScope
 import com.example.uiWebCourse.RootUi
 import com.example.uiWebCourse.TokensDataStore
+import com.example.uiWebCourse.UiUtils
 import com.example.uiWebCourse.actions.StoreState
 import io.kvision.core.AlignItems
 import io.kvision.core.JustifyContent
@@ -17,25 +18,15 @@ import kotlinx.uuid.UUID
 class CoursesPanel(
     goCourseClick: (UUID) -> Unit,
     storeState: StoreState,
-    tokensDataStore: TokensDataStore
+    tokensDataStore: TokensDataStore,
+    utils: UiUtils
 ) : VPanel(
     alignItems = AlignItems.CENTER,
     spacing = 10,
     justify = JustifyContent.CENTER
 ) {
-    private fun getUserInfo(storeState: StoreState): String {
-        var user = ""
-        if (storeState.userInfo != null) {
-            user += "${storeState.userInfo.firstName} ${storeState.userInfo.lastName}"
-            if (storeState.userInfo.patronymic != null) {
-                user += " ${storeState.userInfo.patronymic}"
-            }
-        }
-        return user
-    }
-
     init {
-        div("Добро пожаловать ${getUserInfo(storeState)}!"){
+        div("Добро пожаловать ${utils.getUserInfo(storeState)}!"){
             this.marginTop = 10.px
         }
 
