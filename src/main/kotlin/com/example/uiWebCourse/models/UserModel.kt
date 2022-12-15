@@ -1,6 +1,7 @@
 package com.example.uiWebCourse.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.uuid.UUID
 
 @Serializable
 data class RegisterUserModel(
@@ -13,6 +14,7 @@ data class RegisterUserModel(
 
 @Serializable
 data class GetUserModel(
+    val userId: UUID,
     val firstName: String,
     val lastName: String,
     val patronymic: String? = null

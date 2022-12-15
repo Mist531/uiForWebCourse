@@ -21,6 +21,7 @@ data class StoreState(
     val selectCourse: SelectCourse? = null,
     val resultCourse: ResultCourseModel? = null,
     val loading: Boolean = false,
+    val adminInfo: String? = null,
 )
 
 sealed class StoreAction : RAction {
@@ -32,6 +33,7 @@ sealed class StoreAction : RAction {
     data class SetNameSelectCourse(val selectCourse: SelectCourse?) : StoreAction()
     data class SetResultCourse(val resultCourse: ResultCourseModel?) : StoreAction()
     data class SetLoading(val loading: Boolean) : StoreAction()
+    data class SetAdminInfo(val adminInfo: String?) : StoreAction()
 }
 
 fun storeReducer(state: StoreState, action: StoreAction): StoreState = when (action) {
@@ -43,4 +45,5 @@ fun storeReducer(state: StoreState, action: StoreAction): StoreState = when (act
     is StoreAction.SetNameSelectCourse -> state.copy(selectCourse = action.selectCourse)
     is StoreAction.SetResultCourse -> state.copy(resultCourse = action.resultCourse)
     is StoreAction.SetLoading -> state.copy(loading = action.loading)
+    is StoreAction.SetAdminInfo -> state.copy(adminInfo = action.adminInfo)
 }

@@ -21,41 +21,48 @@ class RegistrationPanel(
 
             add(
                 key = RegisterUserModel::login,
-                control = Text(
-                    label = "Email"
-                ),
+                control = Text(label = "Email"),
                 required = true,
-                validatorMessage = { "Введите Email" }
+                validatorMessage = { "Введите Email" },
+                requiredMessage = "Введите Email"
             ) {
                 it.getValue()?.isEmailValid()
             }
 
             add(
-                key = RegisterUserModel::firstName,
-                control = Text(label = "FirstName"),
-                required = true
+                key = RegisterUserModel::lastName,
+                control = Text(label = "Фамилия"),
+                required = true,
+                validatorMessage = { "Введите Фамилия" },
+                requiredMessage = "Введите Фамилия"
             ) {
                 it.getValue()?.isNotEmpty()
             }
 
             add(
-                key = RegisterUserModel::lastName,
-                control = Text(label = "LastName"),
-                required = true
+                key = RegisterUserModel::firstName,
+                control = Text(label = "Имя"),
+                required = true,
+                validatorMessage = { "Введите Имя" },
+                requiredMessage = "Введите Имя"
             ) {
                 it.getValue()?.isNotEmpty()
             }
 
             add(
                 key = RegisterUserModel::patronymic,
-                control = Password(label = "Patronymic"),
-                required = false
+                control = Text(label = "Оттество"),
+                required = false,
+                validatorMessage = { "Введите Оттество" },
+                requiredMessage = "Введите Оттество"
             )
 
             add(
                 key = RegisterUserModel::password,
-                control = Password(label = "Password"),
-                required = true
+                control = Password(label = "Пароль"),
+                required = true,
+                validatorMessage = { "Введите Пароль" },
+                requiredMessage = "Введите Пароль"
             ) {
                 it.getValue()?.isNotEmpty()
             }

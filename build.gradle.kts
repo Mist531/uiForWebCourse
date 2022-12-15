@@ -29,8 +29,6 @@ val kvisionVersion: String by System.getProperties()
 val ktorVersion: String by System.getProperties()
 val koinVersion:String by System.getProperties()
 
-
-
 val webDir = file("src/main/web")
 
 kotlin {
@@ -86,7 +84,6 @@ kotlin {
         implementation("io.ktor:ktor-client-logging:$ktorVersion")
         //koin
         implementation("io.insert-koin:koin-core:$koinVersion")
-        //implementation ("io.insert-koin:koin-logger-slf4j:$koinVersion")
         //kotlinx
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
         implementation("app.softwork:kotlinx-uuid-core:0.0.16")

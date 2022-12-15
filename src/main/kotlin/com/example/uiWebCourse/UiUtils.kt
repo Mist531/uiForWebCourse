@@ -12,6 +12,7 @@ import io.kvision.redux.ReduxStore
 import io.kvision.routing.routing
 import io.kvision.toast.ToastContainer
 import io.kvision.toast.ToastContainerPosition
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.uuid.UUID
@@ -22,6 +23,7 @@ class UiUtils : KoinComponent {
 
     private val userManager: UserManager by inject()
     private val courseManager: CourseManager by inject()
+    private val tokensDataStore: TokensDataStore by inject()
 
     suspend fun startLoading(
         store: ReduxStore<StoreState, StoreAction>
@@ -32,7 +34,6 @@ class UiUtils : KoinComponent {
     }
 
     fun initStore(
-        tokensDataStore: TokensDataStore,
         store: ReduxStore<StoreState, StoreAction>
     ) {
         if (tokensDataStore.getJwtTokens() == null) {
@@ -67,7 +68,7 @@ class UiUtils : KoinComponent {
     ): String {
         var user = ""
         if (storeState.userInfo != null) {
-            user += "${storeState.userInfo.firstName} ${storeState.userInfo.lastName}"
+            user += "${storeState.userInfo.lastName} ${storeState.userInfo.firstName}"
             if (storeState.userInfo.patronymic != null) {
                 user += " ${storeState.userInfo.patronymic}"
             }
@@ -84,7 +85,7 @@ class UiUtils : KoinComponent {
         } else {
             val listWrongQuestion = resultCourseModel.listWrongQuestion
             "Вы ответили неправильно на ${resultCourseModel.wrongAnswer} ${
-                when(resultCourseModel.wrongAnswer) {
+                when (resultCourseModel.wrongAnswer) {
                     1 -> "вопрос"
                     2, 3, 4 -> "вопроса"
                     else -> "вопросов"
@@ -114,8 +115,10 @@ class UiUtils : KoinComponent {
 
     fun uiDialogComponets(
         storeState: StoreState,
-        store: ReduxStore<StoreState, StoreAction>
+        store: ReduxStore<StoreState, StoreAction>,
+        scope: CoroutineScope
     ) {
+        val tokensDataStore: TokensDataStore by inject()
         if (storeState.loading) {
             ToastContainer(
                 toastContainerPosition = ToastContainerPosition.BOTTOMRIGHT,
@@ -132,6 +135,15 @@ class UiUtils : KoinComponent {
                 text = storeState.errorMessage.toString(),
                 centered = true
             ) {
+                if (storeState.errorMessage == "401 Unauthorized" && tokensDataStore.getJwtTokens() != null) {
+                    tokensDataStore.clearTokens().let {
+                        scope.launch {
+                            userManager.refreshTokens(
+                                store = store
+                            )
+                        }
+                    }
+                }
                 store.dispatch(StoreAction.Error(errorMessage = null))
             }
         }
@@ -145,6 +157,18 @@ class UiUtils : KoinComponent {
                 centered = true
             ) {
                 store.dispatch(StoreAction.SetResultCourse(resultCourse = null))
+            }
+        }
+        if (
+            storeState.adminInfo != null &&
+            storeState.userInfo?.userId == UUID("404c889c-c9ef-457d-880a-9f649a2768fd")
+        ) {
+            Alert.show(
+                caption = I18n.tr("Администратор"),
+                text = storeState.adminInfo.toString(),
+                centered = true
+            ) {
+                store.dispatch(StoreAction.SetAdminInfo(adminInfo = null))
             }
         }
     }

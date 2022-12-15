@@ -21,7 +21,7 @@ enum class API(val url: String) {
     PUT_COURSE(DefaultUrl.DEFAULT.url + "/course"),
     POST_COURSE(DefaultUrl.DEFAULT.url + "/course"),
     DELETE_COURSE(DefaultUrl.DEFAULT.url + "/course"),
-    GET_QUESTIONS(DefaultUrl.DEFAULT.url + "/getQuestion"),
+    GET_QUESTIONS(DefaultUrl.DEFAULT.url + "/question"),
     POST_QUESTION(DefaultUrl.DEFAULT.url + "/question"),
     PUT_QUESTION(DefaultUrl.DEFAULT.url + "/question"),
     DELETE_QUESTION(DefaultUrl.DEFAULT.url + "/question"),

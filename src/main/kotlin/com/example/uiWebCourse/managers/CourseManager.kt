@@ -1,5 +1,6 @@
 package com.example.uiWebCourse.managers
 
+import com.example.uiWebCourse.AdminInfo
 import com.example.uiWebCourse.AppScope
 import com.example.uiWebCourse.RootUi
 import com.example.uiWebCourse.actions.StoreAction
@@ -9,12 +10,15 @@ import com.example.uiWebCourse.repositories.CourseRepositories
 import io.kvision.redux.ActionCreator
 import io.kvision.routing.routing
 import kotlinx.coroutines.launch
+import kotlinx.uuid.UUID
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 interface CourseManager {
     suspend fun getCourseInfo(): ActionCreator<dynamic, StoreState>
     suspend fun checkCourseAnswer(checkCourseModel: CheckCourseModel): ActionCreator<dynamic, StoreState>
+
+    suspend fun deleteCourse(courseId: UUID): ActionCreator<dynamic, StoreState>
 }
 
 class CourseManagerImpl : CourseManager, KoinComponent {
@@ -38,6 +42,23 @@ class CourseManagerImpl : CourseManager, KoinComponent {
                 courseRep.checkCourse(checkCourseModel).let { (result, errorMessage) ->
                     if (result != null) {
                         dispatch(StoreAction.SetResultCourse(result))
+                    } else {
+                        dispatch(StoreAction.Error(errorMessage))
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun deleteCourse(
+        courseId: UUID
+    ): ActionCreator<dynamic, StoreState> {
+        return { dispatch, _ ->
+            val courseRep: CourseRepositories by inject()
+            AppScope.launch {
+                courseRep.deleteCourse(courseId).let {(isSuccess, errorMessage) ->
+                    if (isSuccess) {
+                        dispatch(StoreAction.SetAdminInfo(AdminInfo.DELETE_COURSE.value))
                     } else {
                         dispatch(StoreAction.Error(errorMessage))
                     }

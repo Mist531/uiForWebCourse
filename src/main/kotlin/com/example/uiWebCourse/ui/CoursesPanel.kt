@@ -19,14 +19,16 @@ class CoursesPanel(
     goCourseClick: (UUID) -> Unit,
     storeState: StoreState,
     tokensDataStore: TokensDataStore,
-    utils: UiUtils
+    utils: UiUtils,
+    deleteCourse: (UUID) -> Unit
 ) : VPanel(
     alignItems = AlignItems.CENTER,
     spacing = 10,
     justify = JustifyContent.CENTER
 ) {
     init {
-        div("Добро пожаловать ${utils.getUserInfo(storeState)}!"){
+
+        div("Добро пожаловать ${utils.getUserInfo(storeState)}!") {
             this.marginTop = 10.px
         }
 
@@ -58,10 +60,21 @@ class CoursesPanel(
                             align = Align.CENTER
                             button(
                                 text = "Пройти курс",
-                                style = ButtonStyle.LIGHT
+                                style = ButtonStyle.SUCCESS
                             ) {
                                 onClick {
                                     goCourseClick(course.courseInfoId)
+                                }
+                            }
+                            if (storeState.userInfo?.userId == UUID("404c889c-c9ef-457d-880a-9f649a2768fd")) {
+                                button(
+                                    text = "Удалить курс",
+                                    style = ButtonStyle.DANGER
+                                ) {
+                                    this.marginLeft = 10.px
+                                    onClick {
+                                        deleteCourse(course.courseInfoId)
+                                    }
                                 }
                             }
                         }

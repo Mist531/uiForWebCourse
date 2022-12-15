@@ -8,6 +8,7 @@ import io.kvision.core.AlignItems
 import io.kvision.core.JustifyContent
 import io.kvision.form.check.RadioGroup
 import io.kvision.form.formPanel
+import io.kvision.html.ButtonStyle
 import io.kvision.html.button
 import io.kvision.html.div
 import io.kvision.html.h4
@@ -20,7 +21,8 @@ import kotlinx.uuid.generateUUID
 class QuestionsPanel(
     backClick: () -> Unit,
     checkCourse: (CheckCourseModel) -> Unit,
-    storeState: StoreState,
+    deleteQuestion: (UUID) -> Unit,
+    storeState: StoreState
 ) : VPanel(
     alignItems = AlignItems.CENTER,
     spacing = 10,
@@ -40,6 +42,16 @@ class QuestionsPanel(
                 validatorMessage = { "Выберите ответ" },
             ) {
                 it.getValue()?.isNotEmpty() == true && it.getValue() != null
+            }
+            if (storeState.userInfo?.userId == UUID("404c889c-c9ef-457d-880a-9f649a2768fd")) {
+                button(
+                    text = "Удалить вопрос",
+                    style = ButtonStyle.DANGER
+                ) {
+                    onClick {
+                        deleteQuestion(course.questionInfoId)
+                    }
+                }
             }
         }
     }

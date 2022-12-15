@@ -38,14 +38,16 @@ class LoginPanel(
                 control = Text(label = "Email"),
                 required = true,
                 validatorMessage = { "Введите Email" },
+                requiredMessage = "Введите Email",
             ) {
                 it.getValue()?.isEmailValid() == true || it.getValue() == "admin"
             }
             add(
                 key = LoginModel::password,
-                control = Text(label = "Password"),
+                control = Text(label = "Пароль"),
                 required = true,
-                validatorMessage = { "Введите Password" }
+                validatorMessage = { "Введите Пароль" },
+                requiredMessage = "Введите Пароль",
             ) {
                 it.getValue()?.isNotEmpty()
             }
@@ -62,6 +64,8 @@ class LoginPanel(
                         console.log(loginModel.toString())
                         console.log(validation.toString())
                         if (validation) {
+                            console.log("Валидация прошла успешно")
+                            console.log("loginModel: $loginModel")
                             loginClick(loginModel)
                         }
                     }

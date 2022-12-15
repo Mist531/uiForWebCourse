@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 val AppScope = CoroutineScope(window.asCoroutineDispatcher())
 
@@ -50,15 +51,13 @@ class App : Application(), KoinComponent {
         Routing.init(null, true, Strategy.ALL)
 
         startKoin {
+            printLogger(Level.DEBUG)
             modules(
                 clientModule, repositoriesModule, commonModule, managersModule
             )
         }
 
-        utils.initStore(
-            tokensDataStore = tokensDataStore,
-            store = store
-        )
+        utils.initStore(store = store)
     }
 
     override fun start() {
@@ -67,6 +66,7 @@ class App : Application(), KoinComponent {
                 utils.uiDialogComponets(
                     storeState = storeState,
                     store = store,
+                    scope = AppScope
                 )
                 add(
                     panel = RegistrationPanel(
@@ -84,7 +84,8 @@ class App : Application(), KoinComponent {
                     panel = LoginPanel(
                         loginClick = { loginModel ->
                             AppScope.launch {
-                                this@App.store.dispatch(
+                                utils.startLoading(store = store)
+                                store.dispatch(
                                     userManager.login(
                                         store = store,
                                         loginModel
@@ -121,9 +122,24 @@ class App : Application(), KoinComponent {
                                 }
                             }
                         },
-                        storeState = storeState,
+                        storeState = store.getState(),
                         tokensDataStore = tokensDataStore,
-                        utils = utils
+                        utils = utils,
+                        deleteCourse = { courseInfoId ->
+                            AppScope.launch {
+                                utils.startLoading(store = store)
+                                launch {
+                                    store.dispatch(
+                                        courseManager.deleteCourse(courseInfoId)
+                                    )
+                                }
+                                launch {
+                                    store.dispatch(
+                                        courseManager.getCourseInfo()
+                                    )
+                                }
+                            }
+                        }
                     ),
                     route = RootUi.COURSES.url
                 )
@@ -143,6 +159,25 @@ class App : Application(), KoinComponent {
                             }
                         },
                         storeState = storeState,
+                        deleteQuestion = { id ->
+                            AppScope.launch {
+                                utils.startLoading(store = store)
+                                launch {
+                                    store.dispatch(
+                                        questionManager.deleteQuestion(id)
+                                    )
+                                }
+                                launch {
+                                    storeState.selectCourse?.courseInfoId?.let { id ->
+                                        store.dispatch(
+                                            questionManager.getQuestions(
+                                                id
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     ),
                     route = RootUi.QUESTIONS.url
                 )
